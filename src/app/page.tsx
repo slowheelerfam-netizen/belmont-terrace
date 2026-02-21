@@ -1,5 +1,5 @@
 'use client'
-import PaymentForm from './components/PaymentForm'
+import PaymentForm from '@/app/components/PaymentForm'
 
 import { useEffect, useState } from 'react'
 

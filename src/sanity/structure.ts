@@ -5,5 +5,6 @@ export const structure: StructureResolver = (S) =>
     .title('Belmont Terrace')
     .items([
       S.documentTypeListItem('communityDocument').title('Community Documents'),
+      S.documentTypeListItem('siteUpdate').title('Site Updates'),
+      S.documentTypeListItem('sitePage').title('Site Pages'),
     ])
-    

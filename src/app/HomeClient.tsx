@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link';
 
 const PaymentModal = dynamic(() => import('@/app/components/PaymentModal'), { ssr: false })
 
@@ -363,7 +364,7 @@ export default function HomeClient({ updates }: { updates: SiteUpdate[] }) {
         }}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between py-4">
-          <a href="/" style={{ textDecoration: 'none' }}>
+          <Link href="/" style={{ textDecoration: 'none' }}>
             <span style={{
               fontFamily: "'Playfair Display SC', serif",
               fontSize: '0.85rem',
@@ -371,7 +372,7 @@ export default function HomeClient({ updates }: { updates: SiteUpdate[] }) {
               color: scrolled ? 'var(--ink)' : 'var(--cream)',
               opacity: 0.9,
             }}>B.T.M.W.C.</span>
-          </a>
+          </Link>
           <ul className="hidden md:flex gap-8 items-center list-none">
             {[
               { label: 'Updates', href: '#updates' },

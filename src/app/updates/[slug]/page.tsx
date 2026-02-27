@@ -1,4 +1,5 @@
 // src/app/updates/[slug]/page.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { groq } from 'next-sanity'
 import { client } from '@/sanity/lib/client'
 import { urlFor } from '@/sanity/lib/image'
@@ -64,9 +65,10 @@ async function getRelated(slug: string): Promise<Update[]> {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const update = await getUpdate(params.slug)
+  const { slug } = await params
+  const update = await getUpdate(slug)
   if (!update) return { title: 'Not Found' }
   return {
     title: `${update.title} | Belmont Terrace Mutual Water Company`,
@@ -160,11 +162,12 @@ const ptComponents = {
 export default async function UpdatePage({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
+  const { slug } = await params
   const [update, related] = await Promise.all([
-    getUpdate(params.slug),
-    getRelated(params.slug),
+    getUpdate(slug),
+    getRelated(slug),
   ])
 
   if (!update) notFound()

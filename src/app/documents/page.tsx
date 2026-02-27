@@ -215,7 +215,7 @@ export default async function DocumentsPage() {
         {/* Contact note */}
         <div className="border border-[#1A1A14]/20 p-6 bg-[#2D5016]/5 text-center">
           <p className="font-['IM_Fell_English',serif] text-lg text-[#1A1A14]/70 italic">
-            Can't find what you're looking for?
+            Can&apos;t find what you&apos;re looking for?
           </p>
           <Link
             href="/#contact"

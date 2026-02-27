@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link';
 
 export default function PaymentSuccess() {
   return (
@@ -11,12 +12,12 @@ export default function PaymentSuccess() {
         <p className="text-sm text-slate-500 font-light leading-relaxed mb-8">
           Thank you! Your water bill payment has been submitted. A receipt will be sent to your email. Your payment will be applied to your account within 1–2 business days.
         </p>
-        <a
+        <Link
           href="/"
           className="inline-block bg-blue-700 text-white px-8 py-3 rounded text-sm font-medium no-underline hover:bg-blue-600 transition-colors"
         >
           Return to Home
-        </a>
+        </Link>
       </div>
     </main>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', address: '', email: '', message: '' })
@@ -20,14 +21,14 @@ export default function ContactPage() {
 
       {/* Nav */}
       <nav className="bg-slate-900 px-6 md:px-12 py-4 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-3 no-underline">
+        <Link href="/" className="flex items-center gap-3 no-underline">
           <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">BT</div>
           <div>
             <div className="text-base font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>Belmont Terrace</div>
             <div className="text-xs text-blue-300">Mutual Water Company</div>
           </div>
-        </a>
-        <a href="/" className="text-sm text-slate-300 no-underline hover:text-white transition-colors">← Back to Home</a>
+        </Link>
+        <Link href="/" className="text-sm text-slate-300 no-underline hover:text-white transition-colors">← Back to Home</Link>
       </nav>
 
       {/* Hero */}

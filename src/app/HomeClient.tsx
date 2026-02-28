@@ -41,12 +41,12 @@ const PHOTO_FADE_MS = 1800
 
 // ─── DOCUMENT ARCHIVE ────────────────────────────────────────────────────────
 const docs = [
-  { icon: '⚖️', title: 'By-Laws', desc: 'Governing documents for Belmont Terrace Mutual Water Co.', href: '#' },
-  { icon: '💧', title: 'Consumer Confidence Reports', desc: 'Annual water quality reports required by the state.', href: '#' },
-  { icon: '💰', title: 'Financial Reports', desc: 'Annual financial statements and budgets.', href: '#' },
-  { icon: '📋', title: 'Meeting Minutes', desc: 'Board and general membership meeting minutes.', href: '#' },
-  { icon: '📅', title: 'Meeting Invitations', desc: 'Upcoming and archived meeting invitations.', href: '#' },
-  { icon: '📰', title: 'Newsletters', desc: 'Community newsletters and announcements.', href: '#' },
+  { icon: '⚖️', title: 'By-Laws', desc: 'Governing documents for Belmont Terrace Mutual Water Co.', href: '/archive?category=Bylaws' },
+  { icon: '💧', title: 'Consumer Confidence Reports', desc: 'Annual water quality reports required by the state.', href: '/archive?category=CCR' },
+  { icon: '💰', title: 'Financial Reports', desc: 'Annual financial statements and budgets.', href: '/archive?category=Financial' },
+  { icon: '📋', title: 'Meeting Minutes', desc: 'Board and general membership meeting minutes.', href: '/archive?category=Minutes' },
+  { icon: '📅', title: 'Neighborhood History', desc: 'Historical documents and photos.', href: '/archive?category=History' },
+  { icon: '📰', title: 'Newsletters', desc: 'Community newsletters and announcements.', href: '/archive?category=Newsletter' },
 ]
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
@@ -172,6 +172,17 @@ export default function HomeClient({ updates }: { updates: SiteUpdate[] }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+
+  const filteredDocs = activeCategory
+    ? docs.filter(doc => doc.title === activeCategory)
+    : docs
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 80)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
   const today = new Date()
   const datelineDate = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
@@ -792,13 +803,17 @@ export default function HomeClient({ updates }: { updates: SiteUpdate[] }) {
             <hr className="flex-1 section-rule-sm" />
           </div>
           <div style={{ borderTop: '3px double var(--rule-dark)', marginBottom: '10px' }} />
-          <h2 style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
-            fontWeight: 700,
-            color: 'var(--ink)',
-            marginBottom: '8px',
-          }}>Documents &amp; Reports</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
+              fontWeight: 700,
+              color: 'var(--ink)',
+            }}>Documents &amp; Reports</h2>
+            {activeCategory && (
+              <button onClick={() => setActiveCategory(null)} style={{ fontFamily: "'Courier Prime', monospace", fontSize: '0.7rem', color: 'var(--warm-gray)'}}>Clear Filter</button>
+            )}
+          </div>
           <p style={{
             fontFamily: "'IM Fell English', serif",
             fontSize: '1rem',
@@ -809,35 +824,37 @@ export default function HomeClient({ updates }: { updates: SiteUpdate[] }) {
             All records pertaining to Belmont Terrace Mutual Water Company, available to member homeowners.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: 'var(--rule)', border: '1px solid var(--rule)' }}>
-            {docs.map((doc) => (
-              <a key={doc.title} href={doc.href} className="doc-card" style={{ padding: '24px 28px', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{doc.icon}</div>
-                <h3 style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: '1.05rem',
-                  fontWeight: 700,
-                  color: 'var(--ink)',
-                }}>{doc.title}</h3>
-                <p style={{
-                  fontFamily: "'IM Fell English', serif",
-                  fontSize: '0.88rem',
-                  color: 'var(--warm-gray)',
-                  lineHeight: 1.55,
-                  fontStyle: 'italic',
-                  flex: 1,
-                }}>{doc.desc}</p>
-                <span style={{
-                  fontFamily: "'Courier Prime', monospace",
-                  fontSize: '0.6rem',
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                  color: 'var(--forest)',
-                  marginTop: '8px',
-                }}>View Archive →</span>
-              </a>
-            ))}
-          </div>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: 'var(--rule)', border: '1px solid var(--rule)' }}>
+      {docs.map((doc) => (
+      <Link key={doc.title} href={doc.href} className="doc-card" style={{ padding: '24px 28px', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+      <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{doc.icon}</div>
+      <h3 style={{
+        fontFamily: "'Playfair Display', serif",
+        fontSize: '1.05rem',
+        fontWeight: 700,
+        color: 'var(--ink)',
+      }}>{doc.title}</h3>
+      <p style={{
+        fontFamily: "'IM Fell English', serif",
+        fontSize: '0.88rem',
+        color: 'var(--warm-gray)',
+        lineHeight: 1.55,
+        fontStyle: 'italic',
+        flex: 1,
+      }}>{doc.desc}</p>
+      <span style={{
+        fontFamily: "'Courier Prime', monospace",
+        fontSize: '0.6rem',
+        letterSpacing: '0.15em',
+        textTransform: 'uppercase',
+        color: 'var(--forest)',
+        marginTop: '8px',
+      }}>View Archive →</span>
+    </Link>
+  ))}
+      </div>
+    </div>
+  </div>
       </section>
 
       {/* ── ABOUT ── */}
@@ -1006,90 +1023,7 @@ export default function HomeClient({ updates }: { updates: SiteUpdate[] }) {
       {/* ── FOOTER ── */}
       <footer style={{ background: '#0F1A08', borderTop: '2px double #2D5016', padding: '48px 0 24px' }}>
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10" style={{ borderBottom: '1px solid #2D5016' }}>
-            <div>
-              <h3 style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: '1rem',
-                fontWeight: 700,
-                color: 'var(--cream)',
-                marginBottom: '6px',
-              }}>Belmont Terrace</h3>
-              <p style={{
-                fontFamily: "'Courier Prime', monospace",
-                fontSize: '0.58rem',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: 'var(--sage)',
-                marginBottom: '14px',
-              }}>Mutual Water Company</p>
-              <p style={{
-                fontFamily: "'IM Fell English', serif",
-                fontSize: '0.85rem',
-                fontStyle: 'italic',
-                color: '#6A8A5A',
-                lineHeight: 1.6,
-              }}>Serving 87 homes in Sebastopol, CA since 1952. Member-owned, community-operated.</p>
-            </div>
-            <div>
-              <h4 style={{
-                fontFamily: "'Courier Prime', monospace",
-                fontSize: '0.58rem',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--sage)',
-                marginBottom: '14px',
-              }}>Public Records</h4>
-              <ul style={{ listStyle: 'none' }}>
-                {['Meeting Minutes', 'Consumer Confidence Reports', 'Newsletters', 'Financial Reports', 'By-Laws'].map(item => (
-                  <li key={item} style={{ marginBottom: '8px' }}>
-                    <a href="#" style={{
-                      fontFamily: "'IM Fell English', serif",
-                      fontSize: '0.88rem',
-                      color: '#6A8A5A',
-                      textDecoration: 'none',
-                      transition: 'color 0.2s',
-                    }}
-                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--sage-light)')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#6A8A5A')}
-                    >{item}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 style={{
-                fontFamily: "'Courier Prime', monospace",
-                fontSize: '0.58rem',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--sage)',
-                marginBottom: '14px',
-              }}>Quick Links</h4>
-              <ul style={{ listStyle: 'none' }}>
-                {[
-                  { label: 'Calendar', href: '/calendar' },
-                  { label: 'Pay Water Bill', href: '#' },
-                  { label: 'Contact Us', href: '/contact' },
-                  { label: 'Late Payment Policy', href: '#' },
-                  { label: 'Jean@BelmontTerrace.org', href: 'mailto:Jean@BelmontTerrace.org' },
-                ].map(item => (
-                  <li key={item.label} style={{ marginBottom: '8px' }}>
-                    <a href={item.href} style={{
-                      fontFamily: "'IM Fell English', serif",
-                      fontSize: '0.88rem',
-                      color: '#6A8A5A',
-                      textDecoration: 'none',
-                      transition: 'color 0.2s',
-                    }}
-                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--sage-light)')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#6A8A5A')}
-                    >{item.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+
           <div style={{
             paddingTop: '20px',
             display: 'flex',

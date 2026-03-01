@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import PaymentForm from '@/app/components/PaymentForm'
 
 interface PaymentModalProps {
@@ -9,6 +10,13 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -18,35 +26,90 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
     return () => { document.body.style.overflow = '' }
   }, [isOpen])
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 999999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+      }}
+    >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(4px)',
+        }}
       />
-      {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      {/* Modal box */}
+      <div
+        style={{
+          position: 'relative',
+          background: '#ffffff',
+          borderRadius: '16px',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
+          width: '100%',
+          maxWidth: '520px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          zIndex: 1,
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '20px 32px',
+          borderBottom: '1px solid #f1f5f9',
+        }}>
           <div>
-            <h2 className="text-xl font-bold text-slate-800" style={{ fontFamily: 'Playfair Display, serif' }}>Pay Water Bill</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Belmont Terrace Mutual Water Company</p>
+            <h2 style={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: 0,
+            }}>Pay Water Bill</h2>
+            <p style={{
+              fontSize: '0.75rem',
+              color: '#94a3b8',
+              margin: '2px 0 0',
+            }}>Belmont Terrace Mutual Water Company</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border-none cursor-pointer text-slate-500 text-lg"
-          >
-            ×
-          </button>
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: '#f1f5f9',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.2rem',
+              color: '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 1,
+            }}
+          >×</button>
         </div>
         {/* Form */}
-        <div className="px-8 py-6">
+        <div style={{ padding: '24px 32px' }}>
           <PaymentForm />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

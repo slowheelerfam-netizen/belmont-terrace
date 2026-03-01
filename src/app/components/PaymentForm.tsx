@@ -11,13 +11,21 @@ import {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
-function CheckoutForm({ name, address, email, note, amount }: {
-  name: string
-  address: string
-  email: string
-  note: string
-  amount: string
-}) {
+// Site color tokens
+const C = {
+  ink: '#1A1A14',
+  cream: '#F5F0E4',
+  creamDark: '#EDE6D6',
+  forest: '#2D5016',
+  forestLight: '#3D6B1E',
+  sage: '#7A9E5A',
+  sageLight: '#A8C285',
+  warmGray: '#8B8478',
+  rule: '#C8BFA8',
+  ruleDark: '#A09888',
+}
+
+function CheckoutForm({ amount }: { name: string; address: string; email: string; note: string; amount: string }) {
   const stripe = useStripe()
   const elements = useElements()
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle')
@@ -26,18 +34,12 @@ function CheckoutForm({ name, address, email, note, amount }: {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!stripe || !elements) return
-
     setStatus('processing')
     setErrorMsg('')
-
     const { error } = await stripe.confirmPayment({
       elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/payment-success`,
-        receipt_email: email,
-      },
+      confirmParams: { return_url: `${window.location.origin}/payment-success` },
     })
-
     if (error) {
       setErrorMsg(error.message || 'Payment failed.')
       setStatus('error')
@@ -48,19 +50,63 @@ function CheckoutForm({ name, address, email, note, amount }: {
     <form onSubmit={handleSubmit}>
       <PaymentElement />
       {errorMsg && (
-        <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
-          {errorMsg}
-        </div>
+        <div style={{
+          marginTop: '16px',
+          fontSize: '0.8rem',
+          color: '#8B1A1A',
+          background: '#F5E8E8',
+          border: '1px solid #D4A0A0',
+          borderRadius: '4px',
+          padding: '10px 14px',
+          fontFamily: "'IM Fell English', serif",
+        }}>{errorMsg}</div>
       )}
       <button
         type="submit"
         disabled={!stripe || status === 'processing'}
-        className="w-full mt-6 bg-blue-700 text-white py-4 rounded text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{
+          width: '100%',
+          marginTop: '24px',
+          background: C.forest,
+          color: C.cream,
+          padding: '14px',
+          border: `1px solid ${C.sage}`,
+          cursor: (!stripe || status === 'processing') ? 'not-allowed' : 'pointer',
+          opacity: (!stripe || status === 'processing') ? 0.6 : 1,
+          fontFamily: "'Courier Prime', monospace",
+          fontSize: '0.68rem',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          transition: 'background 0.2s',
+        }}
       >
         {status === 'processing' ? 'Processing...' : `Pay ${amount}`}
       </button>
     </form>
   )
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.6rem',
+  fontWeight: 500,
+  textTransform: 'uppercase',
+  letterSpacing: '0.2em',
+  color: C.warmGray,
+  marginBottom: '6px',
+  fontFamily: "'Courier Prime', monospace",
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 14px',
+  border: `1px solid ${C.rule}`,
+  borderRadius: '3px',
+  fontSize: '0.875rem',
+  color: C.ink,
+  background: '#ffffff',
+  outline: 'none',
+  fontFamily: "'IM Fell English', serif",
 }
 
 export default function PaymentForm() {
@@ -69,15 +115,9 @@ export default function PaymentForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [form, setForm] = useState({
-    name: '',
-    address: '',
-    email: '',
-    amount: '',
-    note: '',
-  })
+  const [form, setForm] = useState({ name: '', address: '', email: '', amount: '', note: '' })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
@@ -86,16 +126,13 @@ export default function PaymentForm() {
       setError('Please fill in your name, address, and payment amount.')
       return
     }
-
     const amt = parseFloat(form.amount.replace('$', ''))
     if (isNaN(amt) || amt <= 0) {
       setError('Please enter a valid payment amount.')
       return
     }
-
     setError('')
     setLoading(true)
-
     try {
       const res = await fetch('/api/payment', {
         method: 'POST',
@@ -103,11 +140,7 @@ export default function PaymentForm() {
         body: JSON.stringify(form),
       })
       const data = await res.json()
-      if (data.error) {
-        setError(data.error)
-        setLoading(false)
-        return
-      }
+      if (data.error) { setError(data.error); setLoading(false); return }
       setClientSecret(data.clientSecret)
       setStep('payment')
     } catch {
@@ -117,82 +150,110 @@ export default function PaymentForm() {
   }
 
   return (
-    <div className="bg-sky-50 border border-slate-200 rounded p-10">
-      <h3 className="text-2xl font-light mb-2 text-slate-800">Make a Payment</h3>
-      <p className="text-xs text-slate-400 mb-8">Processed securely via Stripe · Redwood Credit Union</p>
+    <div style={{ background: C.creamDark, border: `1px solid ${C.rule}`, borderRadius: '4px', padding: '28px' }}>
+      {/* Section flag */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+        <span style={{
+          background: C.forest,
+          color: C.cream,
+          fontFamily: "'Courier Prime', monospace",
+          fontSize: '0.58rem',
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          padding: '3px 10px',
+        }}>Online Payment</span>
+        <div style={{ flex: 1, borderTop: `1px solid ${C.rule}` }} />
+      </div>
+      <div style={{ borderTop: `2px double ${C.ruleDark}`, marginBottom: '20px' }} />
+
+      <h3 style={{
+        fontFamily: "'Playfair Display', serif",
+        fontSize: '1.5rem',
+        fontWeight: 700,
+        color: C.ink,
+        margin: '0 0 4px',
+      }}>Make a Payment</h3>
+      <p style={{
+        fontFamily: "'Courier Prime', monospace",
+        fontSize: '0.6rem',
+        letterSpacing: '0.12em',
+        color: C.warmGray,
+        textTransform: 'uppercase',
+        marginBottom: '24px',
+      }}>
+        Processed securely via Stripe · Redwood Credit Union
+      </p>
 
       {step === 'details' && (
         <>
-          <div className="mb-4">
-            <label className="block text-xs font-medium uppercase tracking-widest text-slate-400 mb-2">Full Name *</label>
-            <input
-              name="name"
-              type="text"
-              placeholder="Jane Smith"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-slate-200 rounded text-sm text-slate-800 outline-none focus:border-blue-500 bg-white"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-xs font-medium uppercase tracking-widest text-slate-400 mb-2">Property Address *</label>
-            <input
-              name="address"
-              type="text"
-              placeholder="123 Belmont Ave, Sebastopol CA"
-              value={form.address}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-slate-200 rounded text-sm text-slate-800 outline-none focus:border-blue-500 bg-white"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-xs font-medium uppercase tracking-widest text-slate-400 mb-2">Email (for receipt)</label>
-            <input
-              name="email"
-              type="email"
-              placeholder="you@email.com"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-slate-200 rounded text-sm text-slate-800 outline-none focus:border-blue-500 bg-white"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-xs font-medium uppercase tracking-widest text-slate-400 mb-2">Payment Amount *</label>
-            <input
-              name="amount"
-              type="text"
-              placeholder="$0.00"
-              value={form.amount}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-slate-200 rounded text-sm text-slate-800 outline-none focus:border-blue-500 bg-white"
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-xs font-medium uppercase tracking-widest text-slate-400 mb-2">Note / Memo</label>
-            <input
-              name="note"
-              type="text"
-              placeholder="e.g. Q1 2026 water bill"
-              value={form.note}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-slate-200 rounded text-sm text-slate-800 outline-none focus:border-blue-500 bg-white"
-            />
-          </div>
+          {[
+            { field: 'name', label: 'Full Name *', placeholder: 'Jane Smith', type: 'text' },
+            { field: 'address', label: 'Property Address *', placeholder: '123 Belmont Ave, Sebastopol CA', type: 'text' },
+            { field: 'email', label: 'Email (for receipt)', placeholder: 'you@email.com', type: 'email' },
+            { field: 'amount', label: 'Payment Amount *', placeholder: '$0.00', type: 'text' },
+            { field: 'note', label: 'Note / Memo', placeholder: 'e.g. Q1 2026 water bill', type: 'text' },
+          ].map(({ field, label, placeholder, type }) => (
+            <div key={field} style={{ marginBottom: '16px' }}>
+              <label style={labelStyle}>{label}</label>
+              <input
+                name={field}
+                type={type}
+                placeholder={placeholder}
+                value={form[field as keyof typeof form]}
+                onChange={handleChange}
+                style={inputStyle}
+              />
+            </div>
+          ))}
 
           {error && (
-            <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">{error}</div>
+            <div style={{
+              marginBottom: '16px',
+              fontSize: '0.82rem',
+              color: '#8B1A1A',
+              background: '#F5E8E8',
+              border: '1px solid #D4A0A0',
+              borderRadius: '3px',
+              padding: '10px 14px',
+              fontFamily: "'IM Fell English', serif",
+            }}>{error}</div>
           )}
 
-          <div className="bg-amber-50 border border-amber-200 rounded p-3 mb-6">
-            <div className="text-xs text-amber-700 font-light">
+          <div style={{
+            background: '#FFFBEB',
+            border: `1px solid #D4B896`,
+            borderRadius: '3px',
+            padding: '10px 14px',
+            marginBottom: '24px',
+          }}>
+            <p style={{
+              fontSize: '0.78rem',
+              color: '#7A5020',
+              fontFamily: "'IM Fell English', serif",
+              fontStyle: 'italic',
+              margin: 0,
+            }}>
               ⚠️ Your address and note will appear on the transaction record so your payment can be applied to the correct account.
-            </div>
+            </p>
           </div>
 
           <button
             onClick={handleContinue}
             disabled={loading}
-            className="w-full bg-blue-700 text-white py-4 rounded text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer border-none disabled:opacity-50"
+            style={{
+              width: '100%',
+              background: C.forest,
+              color: C.cream,
+              padding: '14px',
+              border: `1px solid ${C.sage}`,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1,
+              fontFamily: "'Courier Prime', monospace",
+              fontSize: '0.68rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              transition: 'background 0.2s',
+            }}
           >
             {loading ? 'Preparing...' : 'Continue to Payment →'}
           </button>
@@ -201,21 +262,63 @@ export default function PaymentForm() {
 
       {step === 'payment' && clientSecret && (
         <>
-          <div className="mb-6 bg-white border border-slate-200 rounded p-4 text-sm text-slate-600">
-            <div><span className="font-medium">Name:</span> {form.name}</div>
-            <div><span className="font-medium">Address:</span> {form.address}</div>
-            <div><span className="font-medium">Amount:</span> {form.amount}</div>
-            {form.note && <div><span className="font-medium">Note:</span> {form.note}</div>}
+          <div style={{
+            marginBottom: '24px',
+            background: '#ffffff',
+            border: `1px solid ${C.rule}`,
+            borderRadius: '3px',
+            padding: '14px 16px',
+            fontSize: '0.85rem',
+            color: C.ink,
+            fontFamily: "'IM Fell English', serif",
+            lineHeight: 1.7,
+          }}>
+            <div><strong>Name:</strong> {form.name}</div>
+            <div><strong>Address:</strong> {form.address}</div>
+            <div><strong>Amount:</strong> {form.amount}</div>
+            {form.note && <div><strong>Note:</strong> {form.note}</div>}
           </div>
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
+
+          <Elements
+            stripe={stripePromise}
+            options={{
+              clientSecret,
+              appearance: {
+                theme: 'stripe',
+                variables: {
+                  colorPrimary: C.forest,
+                  colorBackground: '#ffffff',
+                  colorText: C.ink,
+                  colorDanger: '#8B1A1A',
+                  fontFamily: "'IM Fell English', serif",
+                  borderRadius: '3px',
+                },
+                rules: {
+                  '.Input': { border: `1px solid ${C.rule}`, boxShadow: 'none' },
+                  '.Input:focus': { border: `1px solid ${C.sage}`, boxShadow: 'none' },
+                  '.Label': { color: C.warmGray, fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.15em' },
+                },
+              },
+            }}
+          >
             <CheckoutForm {...form} />
           </Elements>
+
           <button
             onClick={() => setStep('details')}
-            className="w-full mt-3 text-sm text-slate-400 hover:text-slate-600 bg-transparent border-none cursor-pointer py-2"
-          >
-            ← Go back
-          </button>
+            style={{
+              width: '100%',
+              marginTop: '12px',
+              fontSize: '0.7rem',
+              color: C.warmGray,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              fontFamily: "'Courier Prime', monospace",
+              letterSpacing: '0.1em',
+            }}
+          >← Go back</button>
         </>
       )}
     </div>

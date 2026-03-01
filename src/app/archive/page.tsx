@@ -76,7 +76,6 @@ function CategoryPill({ category }: { category: string }) {
 
 const ALL_CATEGORIES = ['Minutes', 'CCR', 'Financial', 'Newsletter', 'Policy', 'History', 'Bylaws']
 
-// ── Inner component that uses useSearchParams ──────────────────────────────
 function ArchiveContent() {
   const searchParams = useSearchParams()
   const [entries, setEntries] = useState<ArchiveEntry[]>([])
@@ -210,8 +209,6 @@ function ArchiveContent() {
                 <a
                   key={i}
                   href={entry.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="group flex items-center gap-4 bg-[#F5F0E4] hover:bg-[#EDE7D4] transition-colors px-4 py-3.5"
                 >
                   <span className="text-lg shrink-0 opacity-40 group-hover:opacity-70 transition-opacity">
@@ -234,7 +231,7 @@ function ArchiveContent() {
                   )}
 
                   <span className="shrink-0 font-['Courier_Prime',monospace] text-xs text-[#2D5016] group-hover:underline whitespace-nowrap">
-                    {entry.type === 'photo' ? 'View ↗' : 'Download ↓'}
+                    {entry.type === 'photo' ? 'View →' : 'Download ↓'}
                   </span>
                 </a>
               ))}
@@ -257,12 +254,9 @@ function ArchiveContent() {
   )
 }
 
-// ── Outer component — wraps inner in Suspense (required for useSearchParams) ─
 export default function ArchivePage() {
   return (
     <div className="min-h-screen bg-[#F5F0E4]">
-
-      {/* Masthead */}
       <header className="border-b-4 border-double border-[#1A1A14]">
         <div className="max-w-5xl mx-auto px-6 py-8 text-center">
           <Link href="/" className="font-['Courier_Prime',monospace] text-xs tracking-[0.3em] uppercase text-[#1A1A14]/40 hover:text-[#2D5016] transition-colors">
